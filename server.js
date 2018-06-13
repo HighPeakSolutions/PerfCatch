@@ -39,19 +39,28 @@ const PerfRecord = sequelize.define('performance', {
 })
 
 const server = http.createServer((req, res) => {
-    const task = PerfRecord.build(
-        {
-            url: 'testurl',
-            perfobj: {},
-            date: new Date()
-        }
-    )
-    task.save().then(function () {
-        console.log('here')
-    })
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello Performance World\n');
+
+    let body = [];
+    req.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', function () {
+        body = JSON.parse(Buffer.concat(body).toString());
+
+        console.log(body)
+        const task = PerfRecord.build(
+            {
+                url: 'testurl',
+                perfobj: body.perfobj,
+                date: new Date()
+            }
+        )
+        task.save().then(function () {
+            console.log('here')
+        })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('Hello Performance World\n');
+    });
 });
 
 server.listen(port, hostname, () => {
