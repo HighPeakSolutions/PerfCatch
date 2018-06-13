@@ -19,5 +19,11 @@
   "bugs": {
     "url": "https://github.com/HighPeakSolutions/PerfCatch/issues"
   },
-  "homepage": "https://github.com/HighPeakSolutions/PerfCatch#readme"
+  "homepage": "https://github.com/HighPeakSolutions/PerfCatch#readme",
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "pg": "^7.4.3",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.37.10"
+  }
 }
