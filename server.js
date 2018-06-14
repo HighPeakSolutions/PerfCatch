@@ -1,8 +1,27 @@
 require('dotenv').config();
-const http = require('http');
+const bodyParser = require('body-parser');
 
 const hostname = 'localhost';
-const port = 5050;
+
+const express = require('express')
+const app = express()
+
+app.use(bodyParser.json());
+
+app.post('/', (req, res) => {
+    const task = PerfRecord.build(
+        {
+            url: req.body.url,
+            perfobj: req.body.perfobj,
+            date: new Date()
+        }
+    )
+    task.save().then(function () {
+    })
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+    res.send('Perf Data Saved');
+})
 
 // Database Configuration
 const Sequelize = require('sequelize');
@@ -17,8 +36,14 @@ const sequelize = new Sequelize(process.env.DBNAME, process.env.DBUSER, process.
         acquire: 30000,
         idle: 10000
     },
-
 });
+
+// first define the model
+const PerfRecord = sequelize.define('performance', {
+    url: Sequelize.STRING,
+    perfobj: Sequelize.JSON,
+    date: Sequelize.TIME
+})
 
 // Test Connection
 sequelize
@@ -30,39 +55,4 @@ sequelize
         console.error('Unable to connect to the database:', err);
     });
 
-
-// first define the model
-const PerfRecord = sequelize.define('performance', {
-    url: Sequelize.STRING,
-    perfobj: Sequelize.JSON,
-    date: Sequelize.TIME
-})
-
-const server = http.createServer((req, res) => {
-
-    let body = [];
-    req.on('data', (chunk) => {
-      body.push(chunk);
-    }).on('end', function () {
-        body = JSON.parse(Buffer.concat(body).toString());
-
-        console.log(body)
-        const task = PerfRecord.build(
-            {
-                url: 'testurl',
-                perfobj: body.perfobj,
-                date: new Date()
-            }
-        )
-        task.save().then(function () {
-            console.log('here')
-        })
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Hello Performance World\n');
-    });
-});
-
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
-});
+app.listen(process.env.PORT, () => console.log('Example app listening on port 3000!'))
